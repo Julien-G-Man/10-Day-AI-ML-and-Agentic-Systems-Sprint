@@ -28,8 +28,7 @@ def search_products(query: str, max_results: int = 5) -> str:
 def search_product_reviews(product_name: str) -> str:
     """Search for expert and user reviews of a specific product."""
     client  = TavilyClient(api_key=os.getenv('TAVILY_API_KEY'))
-    results = client.search(f'{product_name} review pros cons rating',
-max_results=3)
+    results = client.search(f'{product_name} review pros cons rating', max_results=3)
     out = []
     for r in results.get('results', []):
         out.append(f"Review Source: {r['title']}\n{r['content'][:400]}\n")
@@ -40,7 +39,7 @@ class RankingInput(BaseModel):
     user_query:  str = Field(..., description='The original user shopping request')
     max_results: int = Field(3, description='Number of top recommendations to return')
 
-from langchain.tools import StructuredTool
+from langchain_core.tools import StructuredTool
 def _rank_products(products: str, user_query: str, max_results: int = 3) -> str:
     return json.dumps({
         'ranking_complete': True,

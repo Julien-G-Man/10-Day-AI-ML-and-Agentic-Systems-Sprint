@@ -51,24 +51,6 @@ tools = [add_numbers, multiply_numbers, get_current_year]
 # (no custom prompt needed - the agent handles tool invocation automatically)
 agent = create_agent(llm, tools, debug=False)
 
-"""
-Depreciated
-
-# ── Create the executor ────────────────────────────────────
-# AgentExecutor is the loop: runs agent until Final Answer or max_iterations
-executor = AgentExecutor(
-    agent=agent,
-    tools=tools,
-    verbose=True,        # Print each Thought/Action/Observation (for learning!)
-    max_iterations=10,   # Safety limit — prevents infinite loops
-    handle_parsing_errors=True,  # Gracefully handle malformed LLM output
-)
-
-# next was formally
-
-result = executor.invole(...)
-"""
-
 # ── Run the agent ─────────────────────────────────────────
 result = agent.invoke({'messages': [HumanMessage(content='What is 37 multiplied by 48, then add 2025 minus the current year?')]})
 print('\nFINAL ANSWER:', result['messages'][-1].content)
