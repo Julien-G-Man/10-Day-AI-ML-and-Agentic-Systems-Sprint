@@ -100,7 +100,6 @@ class MedicalRAGEngine:
             temperature=temperature,
         )
 
-        # System prompt — critical for RAG quality
         system_prompt = """You are a clinical decision support AI assistant.
 Answer questions based ONLY on the provided context from medical guidelines.
 Always cite the guideline section when possible.

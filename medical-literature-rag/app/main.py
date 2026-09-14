@@ -1,6 +1,6 @@
 import time
 import logging
-from fastapi import FastAPI, HTTPException, status
+from fastapi import FastAPI, HTTPException, status, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from app.rag_engine import MedicalRAGEngine
 from .schemas import MedicalQuery, MedicalAnswer, HealthResponse
@@ -18,6 +18,12 @@ allow_headers=['*'])
 
 rag_engine = MedicalRAGEngine()
 
+def get_rag_engine() -> MedicalRAGEngine:
+    global rag_engine
+    if rag_engine is None:
+        rag_engine = MedicalRAGEngine()
+    return rag_engine
+
 
 @app.on_event('startup')
 async def startup():
@@ -27,7 +33,7 @@ async def startup():
 
 
 @app.get('/health', response_model=HealthResponse, tags=['System'])
-async def health():
+async def health(rag_engine: MedicalRAGEngine = Depends(get_rag_engine)):
     return HealthResponse(
         status='healthy' if rag_engine.is_loaded else 'degraded',
         index_loaded=rag_engine.is_loaded,
@@ -37,7 +43,7 @@ async def health():
 
 
 @app.post('/ask', response_model=MedicalAnswer, tags=['RAG'])
-async def ask(query: MedicalQuery):
+async def ask(query: MedicalQuery, rag_engine: MedicalRAGEngine = Depends(get_rag_engine)):
     """
     Answer a clinical question using the medical literature knowledge base.
     Every answer is grounded in retrieved guideline documents — no hallucination.
@@ -59,7 +65,7 @@ async def ask(query: MedicalQuery):
 
 
 @app.get('/sources', tags=['System'])
-async def list_sources():
+async def list_sources(rag_engine: MedicalRAGEngine = Depends(get_rag_engine)):
     """List all documents in the knowledge base."""
     return {
         'sources': ['malaria_guidelines.txt', 'hypertension_guidelines.txt', 'diabetes_management.txt'],
