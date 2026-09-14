@@ -1,10 +1,11 @@
 import os, json
-from langchain.tools import tool
-from tavily import TavilyClient
-from pydantic import BaseModel, Field
 from dotenv import load_dotenv
+from tavily import TavilyClient
+from .schemas import RankingInput
+from langchain_core.tools import tool, StructuredTool
 
 load_dotenv()
+
 
 @tool
 def search_products(query: str, max_results: int = 5) -> str:
@@ -23,6 +24,7 @@ def search_products(query: str, max_results: int = 5) -> str:
         out.append(f"Product: {r['title']}\nURL: {r['url']}\nInfo: {r['content'][:300]}\n")
     return '\n'.join(out)
 
+
 @tool
 def search_product_reviews(product_name: str) -> str:
     """Search for expert and user reviews of a specific product."""
@@ -33,18 +35,14 @@ def search_product_reviews(product_name: str) -> str:
         out.append(f"Review Source: {r['title']}\n{r['content'][:400]}\n")
     return '\n'.join(out) or 'No reviews found'
 
-class RankingInput(BaseModel):
-    products:    str = Field(..., description='JSON string listing products with names, prices, pros, cons')
-    user_query:  str = Field(..., description='The original user shopping request')
-    max_results: int = Field(3, description='Number of top recommendations to return')
 
-from langchain_core.tools import StructuredTool
 def _rank_products(products: str, user_query: str, max_results: int = 3) -> str:
     return json.dumps({
         'ranking_complete': True,
         'message': f'Ranked top {max_results} products for: {user_query}',
         'products_evaluated': products[:200],
     })
+
 
 rank_and_recommend = StructuredTool.from_function(
     func=_rank_products,

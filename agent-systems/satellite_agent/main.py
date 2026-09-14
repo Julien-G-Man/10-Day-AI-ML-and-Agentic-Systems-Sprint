@@ -1,15 +1,15 @@
 import time, logging
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from app.schemas import SatelliteReportRequest, SatelliteReportResponse
-from app.agent import build_satellite_agent
+from satellite_agent.schemas import SatelliteReportRequest, SatelliteReportResponse
+from satellite_agent.agent import build_satellite_agent
 
 logging.basicConfig(level=logging.INFO)
 app = FastAPI(title='Satellite Intelligence Agent API', version='1.0.0')
-app.add_middleware(CORSMiddleware, allow_origins=['*'], allow_methods=['*'],
-allow_headers=['*'])
+app.add_middleware(CORSMiddleware, allow_origins=['*'], allow_methods=['*'], allow_headers=['*'])
 
 _agent = None
+
 
 @app.on_event('startup')
 async def startup():
@@ -17,13 +17,16 @@ async def startup():
     _agent = build_satellite_agent(verbose=False)
     logging.info('Satellite agent ready')
 
+
 @app.get("/")
 async def root():
     return {'status': 'ok', 'message': 'Satellite Intelligence Agent API'}
 
+
 @app.get('/health')
 async def health():
     return {'status': 'healthy', 'agent': 'ready'} if _agent else {'status': 'degraded'}
+
 
 @app.post('/satellite-report', response_model=SatelliteReportResponse)
 async def satellite_report(req: SatelliteReportRequest):

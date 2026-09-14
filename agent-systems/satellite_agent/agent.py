@@ -4,11 +4,12 @@ from langchain_openai import ChatOpenAI
 from langchain.agents import create_agent
 from langchain_classic.memory import ConversationBufferWindowMemory
 from langchain_core.messages import HumanMessage
-from app.tools.satellite_tools import lookup_satellite_database, calculate_orbital_params
-from app.tools.search_tools import web_search, search_satellite_news
-from app.tools.report_tools import compile_satellite_report
+from satellite_agent.tools.satellite_tools import lookup_satellite_database, calculate_orbital_params
+from satellite_agent.tools.search_tools import web_search, search_satellite_news
+from satellite_agent.tools.report_tools import compile_satellite_report
 
 load_dotenv()
+
 
 AGENT_SYSTEM_PROMPT = '''You are an expert satellite intelligence analyst.
 Your job: produce comprehensive, accurate intelligence reports about satellites.
@@ -19,7 +20,12 @@ WORKFLOW (follow this order):
 3. Search for recent news about the satellite
 4. Compile everything into a report using compile_satellite_report
 
-RULES: - Always use compile_satellite_report as your FINAL action - Never make up data — only use information from tool results - If a satellite is not in the database, say so and search the web for info - Be concise but complete'''
+RULES:
+- Always use compile_satellite_report as your FINAL action
+- Never make up data — only use information from tool results
+- If a satellite is not in the database, say so and search the web for info
+- Be concise but complete'''
+
 
 class AgentRunner:
     def __init__(self, agent, memory, verbose: bool = False):
@@ -49,7 +55,7 @@ class AgentRunner:
         return {'messages': result['messages'], 'output': assistant_msg, 'raw': result}
 
 
-def build_satellite_agent(verbose: bool = False):
+def build_satellite_agent(verbose: bool = False) -> AgentRunner:
     tools = [
         lookup_satellite_database,
         calculate_orbital_params,
@@ -61,10 +67,11 @@ def build_satellite_agent(verbose: bool = False):
 
     memory = ConversationBufferWindowMemory(k=6, memory_key='chat_history', return_messages=True)
 
-    # Create agent using a system prompt; avoid using deprecated hub.pull
     agent = create_agent(llm, tools, system_prompt=AGENT_SYSTEM_PROMPT, debug=verbose)
 
     return AgentRunner(agent, memory, verbose=verbose)
+
+
 
 if __name__ == '__main__':
     executor = build_satellite_agent(verbose=True)

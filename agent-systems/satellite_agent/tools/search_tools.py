@@ -1,9 +1,12 @@
 import os
+from dotenv import load_dotenv
+from tavily import TavilyClient
 from langchain.tools import tool
 from langchain_community.tools.tavily_search import TavilySearchResults
-from dotenv import load_dotenv
 
 load_dotenv()
+
+client = TavilyClient(api_key=os.getenv('TAVILY_API_KEY'))
 
 web_search = TavilySearchResults(
     max_results=4,
@@ -23,8 +26,6 @@ def search_satellite_news(satellite_name: str, topic: str = 'latest news') -> st
     Use after looking up basic data to find: recent discoveries, status updates,
     mission achievements, anomalies, or upcoming events.
     """
-    from tavily import TavilyClient
-    client = TavilyClient(api_key=os.getenv('TAVILY_API_KEY'))
     query  = f'{satellite_name} {topic} 2024 2025'
     results = client.search(query, max_results=3, search_depth='advanced')
     if not results.get('results'):

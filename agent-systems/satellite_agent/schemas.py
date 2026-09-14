@@ -12,3 +12,7 @@ class SatelliteReportResponse(BaseModel):
     steps_taken:    int
     latency_ms:     float
     timestamp:      datetime = Field(default_factory=datetime.utcnow)
+
+class OrbitalCalcInput(BaseModel):
+    altitude_km: float = Field(..., description='Orbital altitude above Earth surface in km')
+    mass_kg: float     = Field(None, description='Optional satellite mass in kg')
