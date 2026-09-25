@@ -1,5 +1,3 @@
-# The FastAPI application — our ML model serving layer
-
 import time
 from datetime import datetime
 from fastapi import FastAPI, HTTPException, status
@@ -8,7 +6,6 @@ from app.schemas import ETARequest, ETAResponse, HealthResponse
 from app.predictor import ETAPredictor
 
 
-# ── App Setup ──────────────────────────────────────────────────────
 app = FastAPI(
     title="ETA Predictor API",
     description="""
@@ -31,7 +28,6 @@ predictor = ETAPredictor()
 START_TIME = time.time()
 
 
-# ── Startup Event ──────────────────────────────────────────────────
 
 @app.on_event('startup')
 async def load_model_on_startup():
@@ -41,8 +37,6 @@ async def load_model_on_startup():
         print('WARNING: API starting without a loaded model.')
         print('POST /predict will return 503 until a model is loaded.')
 
-
-# ── Endpoints ──────────────────────────────────────────────────────
 
 @app.get('/', include_in_schema=False)
 async def root():
